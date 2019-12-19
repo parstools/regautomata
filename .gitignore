@@ -1,0 +1,8 @@
+backup/
+lib/
+*.exe
+*.dbg
+*.lps
+out*.dot
+*.png
+

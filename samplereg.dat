@@ -1,0 +1,8 @@
+Simple regs:
+a|b|c
+a|(b|c)|s
+a|b(c|de)fg
+(a|b)*a
+(a|b)c  ;sample from http://lambda.uta.edu/cse5317/notes/node9.html
+(a|b)*(abb | a+b) ;also from node9.html
+
