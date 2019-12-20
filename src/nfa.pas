@@ -57,7 +57,7 @@ type
     procedure AddTransition(t: TTransition);
     procedure AddTransition(AInitStr: string; dest: integer);
     procedure FindTransitionByLabel(lab: TLabel; List: TTransitionList);
-    procedure FindTransitionByLabelAndDest(t: TTransition; List: TTransitionList);
+    function CountTransitionByLabelAndDest(t: TTransition): integer;
     function Unfinish: TNfaState;
     function Clone: TNfaState;
     function AloneEpsTransition: boolean;
@@ -215,14 +215,14 @@ begin
        List.Add(fTrList[i]);
 end;
 
-procedure TNfaState.FindTransitionByLabelAndDest(t: TTransition;
-  List: TTransitionList);
+function TNfaState.CountTransitionByLabelAndDest(t: TTransition): integer;
 var
   i: integer;
 begin
+  Result:=0;
   for i:=0 to fTrList.Count-1 do
      if fTrList[i].Equals(t) then
-       List.Add(fTrList[i]);
+       inc(Result);
 end;
 
 function TNfaState.Unfinish: TNfaState;
@@ -448,7 +448,7 @@ var
   t, tback: TTransition;
   destState: TNfaState;
   backCounts: array of integer;
-  List: TTransitionList;
+  trCount: integer;
 begin
   fc := 0;
   fcErr := 0;
@@ -473,10 +473,8 @@ begin
     for j:= 0 to fStates[i].fTrList.Count-1 do
     begin
        inc(backCounts[fStates[i].fTrList[j].fDest]);
-       List:=TTransitionList.Create(false);
-       fStates[i].FindTransitionByLabelAndDest(fStates[i].fTrList[j], List);
-       if List.Count>1 then inc(doubleErr);
-       List.Free;
+       trCount:=fStates[i].CountTransitionByLabelAndDest(fStates[i].fTrList[j]);
+       if trCount>1 then inc(doubleErr);
     end;
   end;
   for i := 0 to High(backCounts) do
