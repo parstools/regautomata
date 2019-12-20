@@ -24,12 +24,8 @@ type
     procedure MakePlus;
     procedure MakeQuest;
     procedure MakeStar;
-    function getDot: string;
-    function getState(Index: Integer):TNfaState;
     procedure Check();
-    procedure printDot(AFileName: string);
   end;
-
 
 implementation
 
@@ -142,28 +138,6 @@ begin
   MakeQuest;
 end;
 
-function TNfa.getDot: string;
-var
-  i: integer;
-begin
-  Result := 'digraph a {'#10'        rankdir=LR;'#10;
-  for i := 0 to fStates.Count-1 do
-  begin
-    if fStates[i].fFinished then
-      Result := Result+'node [shape = doublecircle] '+IntToStr(fStates[i].SelfIndex)+#10
-    else
-      Result := Result+'node [shape = circle] '+IntToStr(fStates[i].SelfIndex)+#10;
-  end;
-  for i := 0 to fStates.Count-1 do
-    Result := Result+fStates[i].getDot;
-  Result := Result+'}';
-end;
-
-function TNfa.getState(Index: Integer): TNfaState;
-begin
-  Result := fStates[Index];
-end;
-
 procedure TNfa.Check();
 var
   i, j, k: integer;
@@ -220,16 +194,6 @@ begin
     raise Exception.Create('not started state has zero back transitions');
   if (doubleErr>0) then
     raise Exception.Create('doubled transition');
-end;
-
-procedure TNfa.printDot(AFileName: string);
-var
-  f: TextFile;
-begin
-  AssignFile(f, AFileName);
-  Rewrite(f);
-  write(f, getDot);
-  CloseFile(f);
 end;
 
 end.
