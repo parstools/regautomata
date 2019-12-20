@@ -26,8 +26,8 @@ begin
   c4:=aNfa.Clone;
   c1.MakePlus;
   c1.printDot('outP.dot');
-  //c1.MakePlus;
-  //c1.printDot('outPP.dot');
+  c1.MakePlus;
+  c1.printDot('outPP.dot');
   c1.MakeQuest;
   c1.printDot('outPQ.dot');
   c1.check;

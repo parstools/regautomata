@@ -18,6 +18,7 @@ type
     fInitStr: string;
   public
     constructor Create(AInitStr: string);
+    function Equals(Obj: TObject) : boolean; override;
     function Clone: TLabel;
     function getDot: string;
   end;
@@ -31,6 +32,7 @@ type
   public
     constructor Create(ALabel: TLabel; ADest: integer);
     function Clone: TTransition;
+    function Equals(Obj: TObject) : boolean; override;
     function CloneReverse(newDest: integer): TTransition;
     procedure DeltaIndice(Delta: integer);
     function getDot(ownerIndex: integer): string;
@@ -54,6 +56,8 @@ type
     function DeltaIndices(Delta: integer): TNfaState;
     procedure AddTransition(t: TTransition);
     procedure AddTransition(AInitStr: string; dest: integer);
+    procedure FindTransitionByLabel(lab: TLabel; List: TTransitionList);
+    procedure FindTransitionByLabelAndDest(t: TTransition; List: TTransitionList);
     function Unfinish: TNfaState;
     function Clone: TNfaState;
     function AloneEpsTransition: boolean;
@@ -107,6 +111,17 @@ begin
   end;
 end;
 
+function TLabel.Equals(Obj: TObject): boolean;
+var
+  other: TLabel;
+begin
+  other:=Obj as TLabel;
+  if fEps then
+    Result:=other.fEps
+  else
+    Result:=other.fC=fC;
+end;
+
 function TLabel.Clone: TLabel;
 begin
   Result := TLabel.Create(FInitStr);
@@ -131,6 +146,14 @@ end;
 function TTransition.Clone: TTransition;
 begin
   Result := TTransition.Create(FLabel.Clone, FDest);
+end;
+
+function TTransition.Equals(Obj: TObject): boolean;
+var
+  other: TTransition;
+begin
+  other:=Obj as TTransition;
+  Result:=fLabel.Equals(other.fLabel) and (fDest=other.fDest);
 end;
 
 function TTransition.CloneReverse(newDest: integer): TTransition;
@@ -181,6 +204,25 @@ end;
 procedure TNfaState.AddTransition(AInitStr: string; dest: integer);
 begin
   addTransition(TTransition.Create(TLabel.Create(AInitStr), dest));
+end;
+
+procedure TNfaState.FindTransitionByLabel(lab: TLabel; List: TTransitionList);
+var
+  i: integer;
+begin
+  for i:=0 to fTrList.Count-1 do
+     if fTrList[i].fLabel.Equals(lab) then
+       List.Add(fTrList[i]);
+end;
+
+procedure TNfaState.FindTransitionByLabelAndDest(t: TTransition;
+  List: TTransitionList);
+var
+  i: integer;
+begin
+  for i:=0 to fTrList.Count-1 do
+     if fTrList[i].Equals(t) then
+       List.Add(fTrList[i]);
 end;
 
 function TNfaState.Unfinish: TNfaState;
@@ -399,18 +441,21 @@ end;
 
 procedure TNfa.Check();
 var
-  i, j: integer;
+  i, j, k: integer;
   fc, fcErr, err0: integer;
   emptyErr,emptyBackErr: integer;
+  doubleErr: integer;
   t, tback: TTransition;
   destState: TNfaState;
   backCounts: array of integer;
+  List: TTransitionList;
 begin
   fc := 0;
   fcErr := 0;
   err0 := 0;
   emptyErr := 0;
   emptyBackErr := 0;
+  doubleErr := 0;
   SetLength(backCounts,fStates.Count);
   for i := 0 to fStates.Count-1 do
   begin
@@ -426,7 +471,13 @@ begin
     if fStates[i].fSelfIndex<>i then
       Inc(err0);
     for j:= 0 to fStates[i].fTrList.Count-1 do
+    begin
        inc(backCounts[fStates[i].fTrList[j].fDest]);
+       List:=TTransitionList.Create(false);
+       fStates[i].FindTransitionByLabelAndDest(fStates[i].fTrList[j], List);
+       if List.Count>1 then inc(doubleErr);
+       List.Free;
+    end;
   end;
   for i := 0 to High(backCounts) do
   begin
@@ -444,6 +495,8 @@ begin
     raise Exception.Create('not finished state has zero transitions');
   if (emptyBackErr>0) then
     raise Exception.Create('not started state has zero back transitions');
+  if (doubleErr>0) then
+    raise Exception.Create('doubled transition');
 end;
 
 procedure TNfa.printDot(AFileName: string);
