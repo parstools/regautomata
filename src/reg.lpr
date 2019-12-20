@@ -20,22 +20,19 @@ begin
   aNfa.AddParallel(bNfa);
   aNfa.Check();
 
-  aNfa.printDot('out.dot');
   c1:=aNfa.Clone;
   c2:=aNfa.Clone;
   c3:=aNfa.Clone;
   c4:=aNfa.Clone;
-  c1.printDot('outc1.dot');
   c1.MakePlus;
-{
-  c1.printDot('outplus.dot');
+  c1.printDot('outP.dot');
+  c1.MakeQuest;
+  c1.printDot('outPQ.dot');
+  c1.check;
   c2.MakeQuest;
-  c2.printDot('outquest.dot');
-  c3.MakePlus;
-  c3.MakeQuest;
-  c3.printDot('outPQ.dot');
-  c4.MakeQuest;
-  c4.MakePlus;
-  c4.printDot('outQP.dot');}
+  c2.printDot('outQ.dot');
+  c2.MakePlus;
+  c2.printDot('outQP.dot');
+  c2.check;
 end.
 

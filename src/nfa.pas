@@ -444,12 +444,10 @@ begin
 end;
 
 procedure TNfa.MakePlus;
-var
-  oldFinished: integer;
 begin
-  oldFinished:=fFinishIndex;
-  AddStateByLabel('');
-  fStates[fFinishIndex].AddTransition('',oldFinished);
+  if not fStates[fFinishIndex].OnlyEpsBackTransitions then
+    AddStateByLabel('');
+  fStates[fFinishIndex].AddTransition('',fStartIndex);
 end;
 
 procedure TNfa.MakeQuest;
