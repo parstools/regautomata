@@ -420,7 +420,8 @@ end;
 
 procedure TNfa.MakeStar;
 begin
-
+  MakePlus;
+  MakeQuest;
 end;
 
 function TNfa.getDot: string;
