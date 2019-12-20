@@ -357,10 +357,15 @@ end;
 function TNfa.Clone: TNfa;
 var
   i: integer;
+  state: TNfaState;
 begin
   Result := TNfa.Create(false);
   for i := 0 to FStates.Count-1 do
-    Result.FStates.Add(FStates[i].Clone);
+  begin
+    state:=FStates[i].Clone;
+    state.fStateList:=Result.fStates;
+    Result.fStates.Add(state);
+  end;
   Result.fStartIndex := fStartIndex;
   Result.fFinishIndex := fFinishIndex;
 end;
@@ -379,7 +384,7 @@ procedure TNfa.AddStateByLabel(AInitStr: string);
 var
   newState: TNfaState;
 begin
-  FStates[fFinishIndex].Unfinish;
+  fStates[fFinishIndex].Unfinish;
   newState := TNfaState.Create(True);
   fStates.Add(newState);
   fStates[fFinishIndex].addTransition(AInitStr, fStates.Count-1);
