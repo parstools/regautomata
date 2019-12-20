@@ -67,6 +67,9 @@
     </CodeGeneration>
     <Linking>
       <Debugging>
+        <UseHeaptrc Value="True"/>
+        <TrashVariables Value="True"/>
+        <UseValgrind Value="True"/>
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
     </Linking>
