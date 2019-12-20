@@ -198,7 +198,8 @@ end;
 
 procedure TNfaState.AddTransition(t: TTransition);
 begin
-  FTrList.Add(t);
+  if CountTransitionByLabelAndDest(t)=0 then
+    FTrList.Add(t);
 end;
 
 procedure TNfaState.AddTransition(AInitStr: string; dest: integer);
