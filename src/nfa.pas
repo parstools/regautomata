@@ -205,8 +205,6 @@ end;
 
 function TNfaState.AloneEpsTransition: boolean;
 begin
-  if fTrList.Count = 0 then
-    raise Exception.Create('empty transition list');
   if fTrList.Count>1 then
     Result := False
   else
@@ -217,8 +215,6 @@ function TNfaState.OnlyEpsTransitions: boolean;
 var
   i: integer;
 begin
-  if fTrList.Count = 0 then
-    raise Exception.Create('empty transition list');
   Result := False;
   for i := 0 to fTrList.Count-1 do
     if not fTrList[i].fLabel.fEps then
@@ -405,12 +401,17 @@ procedure TNfa.Check();
 var
   i, j: integer;
   fc, fcErr, err0: integer;
+  emptyErr,emptyBackErr: integer;
   t, tback: TTransition;
   destState: TNfaState;
+  backCounts: array of integer;
 begin
   fc := 0;
   fcErr := 0;
   err0 := 0;
+  emptyErr := 0;
+  emptyBackErr := 0;
+  SetLength(backCounts,fStates.Count);
   for i := 0 to fStates.Count-1 do
   begin
     if fStates[i].fFinished then
@@ -419,17 +420,30 @@ begin
       if fFinishIndex<>i then inc(fcErr);
     end else
     begin
+      if fStates[i].fTrList.Count=0 then inc(emptyErr);
       if fFinishIndex=i then inc(fcErr);
     end;
     if fStates[i].fSelfIndex<>i then
       Inc(err0);
+    for j:= 0 to fStates[i].fTrList.Count-1 do
+       inc(backCounts[fStates[i].fTrList[j].fDest]);
   end;
+  for i := 0 to High(backCounts) do
+  begin
+    if (i<>fStartIndex) and (backCounts[i]=0) then
+       inc(emptyBackErr);
+  end;
+
   if (fc<>1) then
     raise Exception.Create('must be one finish state is '+IntToStr(fc));
   if (fcErr>0) then
     raise Exception.Create('mismatch finished bool and index');
   if (err0>0) then
     raise Exception.Create('FSelfIndex mismatch');
+  if (emptyErr>0) then
+    raise Exception.Create('not finished state has zero transitions');
+  if (emptyBackErr>0) then
+    raise Exception.Create('not started state has zero back transitions');
 end;
 
 procedure TNfa.printDot(AFileName: string);
