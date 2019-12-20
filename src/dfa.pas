@@ -14,13 +14,14 @@ type
   public
     function Clone: TDfa;
     procedure AddState(AFinished: Boolean);
+    constructor Create;
   end;
 
 implementation
 
 function TDfa.Clone: TDfa;
 begin
-  Result := TDfa.Create(false);
+  Result := TDfa.Create;
   CloneStates(Result);
 end;
 
@@ -32,6 +33,11 @@ begin
   fStates.Add(newState);
   newState.SelfIndex := fStates.Count-1;
   newState.StateList := fStates;
+end;
+
+constructor TDfa.Create;
+begin
+  inherited Create(false);
 end;
 
 end.

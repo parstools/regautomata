@@ -50,6 +50,8 @@ type
     fSetList: TSetList;
     function GetNfaSet(i : Longint): TNfaSet;
   public
+    constructor Create;
+    destructor Destroy;override;
     function Count: integer;
     function GetIndex(aNfaSet: TNfaSet): integer;
     property Items[i : Longint]: TNfaSet read GetNfaSet; Default;
@@ -64,6 +66,8 @@ type
     fSetSet: TSetSet;
     procedure MakeLabelSet(aNfa: TNfa);
   public
+    constructor Create;
+    destructor Destroy; override;
     procedure Convert(aNfa: TNfa; aDfa: TDfa);
   end;
 
@@ -74,6 +78,17 @@ implementation
 function TSetSet.GetNfaSet(i : Longint): TNfaSet;
 begin
   Result:=fSetList[i];
+end;
+
+constructor TSetSet.Create;
+begin
+  fSetList:=TSetList.Create();
+end;
+
+destructor TSetSet.Destroy;
+begin
+  fSetList.Free;
+  inherited Destroy;
 end;
 
 function TSetSet.Add(ASet: TNfaSet): integer;
@@ -109,12 +124,14 @@ end;
 
 constructor TNfaSet.Create;
 begin
+  fNfaList:=TNfaList.Create(false);
   fBits:=TBits.Create;
 end;
 
 destructor TNfaSet.Destroy;
 begin
   fBits.Free;
+  fNfaList.Free;
 end;
 
 function TNfaSet.Equals(Obj: TObject): boolean;
@@ -127,6 +144,7 @@ end;
 
 procedure TNfaSet.Add(nfaState: TState);
 begin
+  if (nfaState.SelfIndex<fBits.Size)and(fBits[nfaState.SelfIndex]) then exit;
   fNfaList.Add(nfaState);
   fBits.SetOn(nfaState.SelfIndex);
   if nfaState.Finished then FFinished:=true;
@@ -161,6 +179,7 @@ begin
        DestSet.Add(DestState);
      end;
     List.Free;
+    inc(index);
   end;
 end;
 
@@ -178,6 +197,19 @@ begin
   list.Free;
 end;
 
+constructor TNfaConverter.Create;
+begin
+  fLabelSet:=TLabelSet.Create();
+  fSetSet:=TSetSet.Create();
+end;
+
+destructor TNfaConverter.Destroy;
+begin
+  fSetSet.Free;
+  fLabelSet.Free;
+  inherited Destroy;
+end;
+
 procedure TNfaConverter.Convert(aNfa: TNfa; aDfa: TDfa);
 var
   srcIndex: integer;
@@ -190,6 +222,7 @@ begin
   StartSet.Add(aNfa.getState(aNfa.StartIndex));
   StartSet.eClosure(aNfa);
   fSetSet.Add(StartSet);
+  aDfa.AddState(StartSet.Finished);
   srcIndex := 0;
   while srcIndex<fSetSet.Count do
   begin
@@ -207,6 +240,7 @@ begin
         aDfa[srcIndex].AddTransition(fLabelSet[labelIdx].InitStr, destIndex);
       end;
     end;
+    inc(srcIndex);
   end;
 end;
 

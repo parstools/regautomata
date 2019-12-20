@@ -5,6 +5,8 @@ uses Nfa, Dfa, NfaConverter, Fa;
 var
   aNfa,bNfa: TNfa;
   c1,c2,c3,c4: TNfa;
+  aDfa: TDfa;
+  conv: TNfaConverter;
 begin
   aNfa:=TNfa.Create;
   aNfa.AddStateByLabel('a');
@@ -19,6 +21,12 @@ begin
 
   aNfa.JoinParallel(bNfa);
   aNfa.Check();
+  aNfa.printDot('outaNFA.dot');
+  aDfa:=TDfa.Create;
+  conv:=TNfaConverter.Create;
+  conv.Convert(aNfa, aDfa);
+  aDfa.printDot('outaDFA.dot');
+
 
   c1:=aNfa.Clone;
   c2:=aNfa.Clone;
