@@ -24,7 +24,7 @@ type
   end;
 
   { TNfaSet }
-  TNfaList = specialize TFPGObjectList<TNfaState>;
+  TNfaList = specialize TFPGObjectList<TState>;
 
   TNfaSet = class
   private
@@ -34,7 +34,7 @@ type
     constructor Create;
     destructor Destroy; override;
     function Equals(Obj: TObject): boolean; override;
-    procedure Add(nfaState: TNfaState);
+    procedure Add(nfaState: TState);
     procedure eClosure(aNfa: TNfa);
     function nonEmpty: boolean;
     procedure TransitTo(aNfa: TNfa; ALabel:TLabel; DestSet:TNfaSet);
@@ -123,7 +123,7 @@ begin
   Result:=fBits.Equals(other.fBits);
 end;
 
-procedure TNfaSet.Add(nfaState: TNfaState);
+procedure TNfaSet.Add(nfaState: TState);
 begin
   fNfaList.Add(nfaState);
   fBits.SetOn(nfaState.SelfIndex);
@@ -142,15 +142,15 @@ end;
 procedure TNfaSet.TransitTo(aNfa: TNfa; ALabel: TLabel; DestSet: TNfaSet);
 var
   i,index: integer;
-  SrcState: TNfaState;
-  DestState: TNfaState;
-  List: TNfaTransitionList;
+  SrcState: TState;
+  DestState: TState;
+  List: TTransitionList;
 begin
   index := 0;
   while index<fNfaList.Count do
   begin
     SrcState := fNfaList[Index];
-    List:=TNfaTransitionList.Create(false);
+    List:=TTransitionList.Create(false);
     SrcState.FindTransitionByLabel(ALabel,list);
     for i := 0 to List.Count-1 do
      begin

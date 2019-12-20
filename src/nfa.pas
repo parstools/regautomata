@@ -59,26 +59,26 @@ end;
 
 procedure TNfa.AddStateByLabel(AInitStr: string);
 var
-  newState: TNfaState;
+  newState: TState;
 begin
   fStates[FinishIndex].Unfinish;
-  newState := TNfaState.Create(True);
+  newState := TState.Create(True);
   fStates.Add(newState);
   fStates[FinishIndex].addTransition(AInitStr, fStates.Count-1);
   newState.SelfIndex := fStates.Count-1;
-  newState.fStateList := fStates;
+  newState.StateList := fStates;
   FinishIndex := fStates.Count-1;
 end;
 
 procedure TNfa.AddStateByLabelAtStart(AInitStr: string);
 var
-  newState: TNfaState;
+  newState: TState;
 begin
   DeltaIndices(1);
-  newState := TNfaState.Create(False);
+  newState := TState.Create(False);
   fStates.Insert(0, newState);
   newState.SelfIndex := 0;
-  newState.fStateList := fStates;
+  newState.StateList := fStates;
   newState.AddTransition(AInitStr, StartIndex);
   StartIndex := 0;
 end;
@@ -86,13 +86,13 @@ end;
 procedure TNfa.Add(other: TNfa);
 var
   i, delta: integer;
-  st: TNfaState;
+  st: TState;
 begin
   delta := fStates.Count;
   for i := 0 to other.fStates.Count-1 do
   begin
     st := other.fStates[i].Clone.DeltaIndices(delta).Unfinish;
-    st.fStateList:=fStates;
+    st.StateList:=fStates;
     FStates.Add(st);
   end;
   fStates[FinishIndex].AddTransition('', delta);
@@ -113,7 +113,7 @@ begin
   cloned.DeltaIndices(fStates.Count);
   for i := 0 to cloned.fStates.Count-1 do
   begin
-    cloned.fStates[i].fStateList:=fStates;
+    cloned.fStates[i].StateList:=fStates;
     fStates.Add(cloned.fStates[i]);
   end;
   fStates[StartIndex].AddTransition('', cloned.StartIndex);
@@ -145,7 +145,7 @@ var
   emptyErr,emptyBackErr: integer;
   doubleErr: integer;
   t, tback: TTransition;
-  destState: TNfaState;
+  destState: TState;
   backCounts: array of integer;
   trCount: integer;
 begin
@@ -158,21 +158,21 @@ begin
   SetLength(backCounts,fStates.Count);
   for i := 0 to fStates.Count-1 do
   begin
-    if fStates[i].fFinished then
+    if fStates[i].Finished then
     begin
       Inc(fc);
       if FinishIndex<>i then inc(fcErr);
     end else
     begin
-      if fStates[i].fTrList.Count=0 then inc(emptyErr);
+      if fStates[i].TrList.Count=0 then inc(emptyErr);
       if FinishIndex=i then inc(fcErr);
     end;
     if fStates[i].SelfIndex<>i then
       Inc(err0);
-    for j:= 0 to fStates[i].fTrList.Count-1 do
+    for j:= 0 to fStates[i].TrList.Count-1 do
     begin
-       inc(backCounts[fStates[i].fTrList[j].Dest]);
-       trCount:=fStates[i].CountTransitionByLabelAndDest(fStates[i].fTrList[j]);
+       inc(backCounts[fStates[i].TrList[j].Dest]);
+       trCount:=fStates[i].CountTransitionByLabelAndDest(fStates[i].TrList[j]);
        if trCount>1 then inc(doubleErr);
     end;
   end;

@@ -35,28 +35,27 @@ type
     function getDot(ownerIndex: integer): string;
   end;
 
-  { TNfaState }
-  TNfaTransitionList = specialize TFPGObjectList<TTransition>;
-  TNfaState = class;
-  TNfaStateList = specialize TFPGObjectList<TNfaState>;
+  TTransitionList = specialize TFPGObjectList<TTransition>;
+  TState = class;
+  TStateList = specialize TFPGObjectList<TState>;
   TLabelList = specialize TFPGObjectList<TLabel>;
 
-  TNfaState = class
+  TState = class
   public
-    fStateList: TNfaStateList;//@todo rename
-    fFinished: boolean;//@todo rename
-    fTrList: TNfaTransitionList;//@todo rename
+    StateList: TStateList;
+    Finished: boolean;
+    TrList: TTransitionList;
     SelfIndex: integer;
     constructor Create(AFinished: boolean);
     destructor Destroy; override;
     procedure GetAllLabels(list: TLabelList);
-    function DeltaIndices(Delta: integer): TNfaState;
+    function DeltaIndices(Delta: integer): TState;
     procedure AddTransition(t: TTransition);
     procedure AddTransition(AInitStr: string; dest: integer);
-    procedure FindTransitionByLabel(lab: TLabel; List: TNfaTransitionList);
+    procedure FindTransitionByLabel(lab: TLabel; List: TTransitionList);
     function CountTransitionByLabelAndDest(t: TTransition): integer;
-    function Unfinish: TNfaState;
-    function Clone: TNfaState;
+    function Unfinish: TState;
+    function Clone: TState;
     function AloneEpsTransition: boolean;
     function OnlyEpsTransitions: boolean;
     function OnlyEpsBackTransitions: boolean;
@@ -67,7 +66,7 @@ type
 
   TFa = class
   protected
-    fStates: TNfaStateList;
+    fStates: TStateList;
     procedure CloneStates(dest: TFa);
   public
     constructor Create(createState: boolean = True);
@@ -75,7 +74,7 @@ type
     procedure GetAllLabels(list: TLabelList);
     procedure DeltaIndices(Delta: integer);
     function getDot: string;
-    function getState(Index: integer): TNfaState;
+    function getState(Index: integer): TState;
     procedure printDot(AFileName: string);
   end;
 
@@ -161,120 +160,120 @@ begin
     Lab.getDot()+'> ];';
 end;
 
-{ TNfaState }
+{ TState }
 
-constructor TNfaState.Create(AFinished: boolean);
+constructor TState.Create(AFinished: boolean);
 begin
-  fTrList := TNfaTransitionList.Create(True);
-  fFinished := AFinished;
+  TrList := TTransitionList.Create(True);
+  Finished := AFinished;
 end;
 
-destructor TNfaState.Destroy;
+destructor TState.Destroy;
 begin
-  fTrList.Free;
+  TrList.Free;
   inherited Destroy;
 end;
 
-procedure TNfaState.GetAllLabels(list: TLabelList);
+procedure TState.GetAllLabels(list: TLabelList);
 var
   i: integer;
 begin
-  for i:=0 to fTrList.Count-1 do
-    list.Add(fTrList[i].Lab);
+  for i:=0 to TrList.Count-1 do
+    list.Add(TrList[i].Lab);
 end;
 
-function TNfaState.DeltaIndices(Delta: integer): TNfaState;
+function TState.DeltaIndices(Delta: integer): TState;
 var
   i: integer;
 begin
-  for i := 0 to FTrList.Count-1 do
-    FTrList[i].DeltaIndice(Delta);
+  for i := 0 to TrList.Count-1 do
+    TrList[i].DeltaIndice(Delta);
   Inc(SelfIndex, Delta);
   Result := self;
 end;
 
-procedure TNfaState.AddTransition(t: TTransition);
+procedure TState.AddTransition(t: TTransition);
 begin
   if CountTransitionByLabelAndDest(t)=0 then
-    FTrList.Add(t);
+    TrList.Add(t);
 end;
 
-procedure TNfaState.AddTransition(AInitStr: string; dest: integer);
+procedure TState.AddTransition(AInitStr: string; dest: integer);
 begin
   addTransition(TTransition.Create(TLabel.Create(AInitStr), dest));
 end;
 
-procedure TNfaState.FindTransitionByLabel(lab: TLabel; List: TNfaTransitionList);
+procedure TState.FindTransitionByLabel(lab: TLabel; List: TTransitionList);
 var
   i: integer;
 begin
-  for i:=0 to fTrList.Count-1 do
-     if fTrList[i].Lab.Equals(lab) then
-       List.Add(fTrList[i]);
+  for i:=0 to TrList.Count-1 do
+     if TrList[i].Lab.Equals(lab) then
+       List.Add(TrList[i]);
 end;
 
-function TNfaState.CountTransitionByLabelAndDest(t: TTransition): integer;
+function TState.CountTransitionByLabelAndDest(t: TTransition): integer;
 var
   i: integer;
 begin
   Result:=0;
-  for i:=0 to fTrList.Count-1 do
-     if fTrList[i].Equals(t) then
+  for i:=0 to TrList.Count-1 do
+     if TrList[i].Equals(t) then
        inc(Result);
 end;
 
-function TNfaState.Unfinish: TNfaState;
+function TState.Unfinish: TState;
 begin
-  fFinished := False;
+  Finished := False;
   Result := self;
 end;
 
-function TNfaState.Clone: TNfaState;
+function TState.Clone: TState;
 var
   i: integer;
 begin
-  Result := TNfaState.Create(fFinished);
+  Result := TState.Create(Finished);
   Result.SelfIndex := SelfIndex;
-  Result.fFinished:=fFinished;
-  Result.fStateList:=nil; //has not owner yet
-  for i := 0 to FTrList.Count-1 do
+  Result.Finished:=Finished;
+  Result.StateList:=nil; //has not owner yet
+  for i := 0 to TrList.Count-1 do
   begin
-    Result.AddTransition(fTrList[i].Clone);
+    Result.AddTransition(TrList[i].Clone);
   end;
 end;
 
-function TNfaState.AloneEpsTransition: boolean;
+function TState.AloneEpsTransition: boolean;
 begin
-  if fTrList.Count>1 then
+  if TrList.Count>1 then
     Result := False
   else
-    Result := fTrList[0].Lab.Eps;
+    Result := TrList[0].Lab.Eps;
 end;
 
-function TNfaState.OnlyEpsTransitions: boolean;
+function TState.OnlyEpsTransitions: boolean;
 var
   i: integer;
 begin
   Result := False;
-  for i := 0 to fTrList.Count-1 do
-    if not fTrList[i].Lab.Eps then
+  for i := 0 to TrList.Count-1 do
+    if not TrList[i].Lab.Eps then
       exit;
   Result := True;
 end;
 
-function TNfaState.OnlyEpsBackTransitions: boolean;
+function TState.OnlyEpsBackTransitions: boolean;
 var
   i,j: integer;
-  state: TNfaState;
+  state: TState;
   t: TTransition;
 begin
   Result := False;
-  for i:=0 to fStateList.Count-1 do
+  for i:=0 to StateList.Count-1 do
   begin
-     state:=fStateList[i];
-     for j := 0 to state.fTrList.Count-1 do
+     state:=StateList[i];
+     for j := 0 to state.TrList.Count-1 do
      begin
-       t:=state.fTrList[j];
+       t:=state.TrList[j];
        if (t.Dest=SelfIndex) and not t.Lab.Eps then
           exit;
      end;
@@ -282,38 +281,38 @@ begin
   Result := True;
 end;
 
-function TNfaState.getDot: string;
+function TState.getDot: string;
 var
   i: integer;
 begin
   Result := '';
-  for i := 0 to fTrList.Count-1 do
-    Result := Result+fTrList[i].getDot(SelfIndex)+#10;
+  for i := 0 to TrList.Count-1 do
+    Result := Result+TrList[i].getDot(SelfIndex)+#10;
 end;
 
 procedure TFa.CloneStates(dest: TFa);
 var
   i: integer;
-  state: TNfaState;
+  state: TState;
 begin
   for i := 0 to FStates.Count-1 do
   begin
     state:=FStates[i].Clone;
-    state.fStateList:=dest.fStates;
+    state.StateList:=dest.fStates;
     dest.fStates.Add(state);
   end;
 end;
 
 constructor TFa.Create(createState: boolean);
 var
-  firstState: TNfaState;
+  firstState: TState;
 begin
-  fStates := TNfaStateList.Create(True);
+  fStates := TStateList.Create(True);
   if createState then
   begin
-    firstState := TNfaState.Create(True);
+    firstState := TState.Create(True);
     firstState.SelfIndex := 0;
-    firstState.fStateList := fStates;
+    firstState.StateList := fStates;
     fStates.Add(firstState);
   end;
 end;
@@ -327,7 +326,7 @@ end;
 procedure TFa.GetAllLabels(list: TLabelList);
 var
   i, j: integer;
-  State: TNfaState;
+  State: TState;
 begin
   for i := 0 to fStates.Count-1 do
   begin
@@ -350,7 +349,7 @@ begin
   Result := 'digraph a {'#10'        rankdir=LR;'#10;
   for i := 0 to fStates.Count-1 do
   begin
-    if fStates[i].fFinished then
+    if fStates[i].Finished then
       Result := Result+'node [shape = doublecircle] '+IntToStr(fStates[i].SelfIndex)+#10
     else
       Result := Result+'node [shape = circle] '+IntToStr(fStates[i].SelfIndex)+#10;
@@ -360,7 +359,7 @@ begin
   Result := Result+'}';
 end;
 
-function TFa.getState(Index: integer): TNfaState;
+function TFa.getState(Index: integer): TState;
 begin
   Result := fStates[Index];
 end;
