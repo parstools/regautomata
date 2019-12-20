@@ -9,9 +9,9 @@ uses
 
 type
 
-  { TLabel }
+  { TNfaLabel }
 
-  TLabel = class
+  TNfaLabel = class
   private
     fEps: boolean;
     fC: char;
@@ -19,7 +19,7 @@ type
   public
     constructor Create(AInitStr: string);
     function Equals(Obj: TObject) : boolean; override;
-    function Clone: TLabel;
+    function Clone: TNfaLabel;
     function getDot: string;
   end;
 
@@ -27,10 +27,10 @@ type
 
   TTransition = class
   private
-    fLabel: TLabel;
+    fLabel: TNfaLabel;
     fDest: integer;
   public
-    constructor Create(ALabel: TLabel; ADest: integer);
+    constructor Create(ALabel: TNfaLabel; ADest: integer);
     function Clone: TTransition;
     function Equals(Obj: TObject) : boolean; override;
     function CloneReverse(newDest: integer): TTransition;
@@ -56,7 +56,7 @@ type
     function DeltaIndices(Delta: integer): TNfaState;
     procedure AddTransition(t: TTransition);
     procedure AddTransition(AInitStr: string; dest: integer);
-    procedure FindTransitionByLabel(lab: TLabel; List: TTransitionList);
+    procedure FindTransitionByLabel(lab: TNfaLabel; List: TTransitionList);
     function CountTransitionByLabelAndDest(t: TTransition): integer;
     function Unfinish: TNfaState;
     function Clone: TNfaState;
@@ -92,9 +92,9 @@ type
 
 implementation
 
-{ TLabel }
+{ TNfaLabel }
 
-constructor TLabel.Create(AInitStr: string);
+constructor TNfaLabel.Create(AInitStr: string);
 begin
   FInitStr := AInitStr;
   if Length(AInitStr)>1 then
@@ -111,23 +111,23 @@ begin
   end;
 end;
 
-function TLabel.Equals(Obj: TObject): boolean;
+function TNfaLabel.Equals(Obj: TObject): boolean;
 var
-  other: TLabel;
+  other: TNfaLabel;
 begin
-  other:=Obj as TLabel;
+  other:=Obj as TNfaLabel;
   if fEps then
     Result:=other.fEps
   else
     Result:=other.fC=fC;
 end;
 
-function TLabel.Clone: TLabel;
+function TNfaLabel.Clone: TNfaLabel;
 begin
-  Result := TLabel.Create(FInitStr);
+  Result := TNfaLabel.Create(FInitStr);
 end;
 
-function TLabel.getDot: string;
+function TNfaLabel.getDot: string;
 begin
   if fEps then
     Result := '&epsilon;'
@@ -137,7 +137,7 @@ end;
 
 { TTransition }
 
-constructor TTransition.Create(ALabel: TLabel; ADest: integer);
+constructor TTransition.Create(ALabel: TNfaLabel; ADest: integer);
 begin
   FLabel := ALabel;
   FDest := ADest;
@@ -204,10 +204,10 @@ end;
 
 procedure TNfaState.AddTransition(AInitStr: string; dest: integer);
 begin
-  addTransition(TTransition.Create(TLabel.Create(AInitStr), dest));
+  addTransition(TTransition.Create(TNfaLabel.Create(AInitStr), dest));
 end;
 
-procedure TNfaState.FindTransitionByLabel(lab: TLabel; List: TTransitionList);
+procedure TNfaState.FindTransitionByLabel(lab: TNfaLabel; List: TTransitionList);
 var
   i: integer;
 begin

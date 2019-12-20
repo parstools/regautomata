@@ -27,7 +27,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="reg.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -37,6 +37,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Nfa"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="dfa.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Dfa"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
