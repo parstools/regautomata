@@ -68,11 +68,11 @@ type
 
   { TNfa }
   TNfa = class
-  private
+  strict private
     fStates: TNfaStateList;
-    fStartIndex: integer;
-    fFinishIndex: integer;
   public
+    StartIndex: integer;
+    FinishIndex: integer;
     constructor Create(createState: boolean=true);
     destructor Destroy; override;
     function Clone: TNfa;
@@ -85,6 +85,7 @@ type
     procedure MakeQuest;
     procedure MakeStar;
     function getDot: string;
+    function getState(Index: Integer):TNfaState;
     procedure Check();
     procedure printDot(AFileName: string);
   end;
@@ -307,8 +308,8 @@ begin
     firstState.fStateList := fStates;
     fStates.Add(firstState);
   end;
-  fStartIndex := 0;
-  fFinishIndex := 0;
+  StartIndex := 0;
+  FinishIndex := 0;
 end;
 
 destructor TNfa.Destroy;
@@ -329,8 +330,8 @@ begin
     state.fStateList:=Result.fStates;
     Result.fStates.Add(state);
   end;
-  Result.fStartIndex := fStartIndex;
-  Result.fFinishIndex := fFinishIndex;
+  Result.StartIndex := StartIndex;
+  Result.FinishIndex := FinishIndex;
 end;
 
 procedure TNfa.DeltaIndices(Delta: integer);
@@ -339,21 +340,21 @@ var
 begin
   for i := 0 to FStates.Count-1 do
     FStates[i].DeltaIndices(Delta);
-  inc(fStartIndex,Delta);
-  inc(fFinishIndex,Delta);
+  inc(StartIndex,Delta);
+  inc(FinishIndex,Delta);
 end;
 
 procedure TNfa.AddStateByLabel(AInitStr: string);
 var
   newState: TNfaState;
 begin
-  fStates[fFinishIndex].Unfinish;
+  fStates[FinishIndex].Unfinish;
   newState := TNfaState.Create(True);
   fStates.Add(newState);
-  fStates[fFinishIndex].addTransition(AInitStr, fStates.Count-1);
+  fStates[FinishIndex].addTransition(AInitStr, fStates.Count-1);
   newState.fSelfIndex := fStates.Count-1;
   newState.fStateList := fStates;
-  fFinishIndex := fStates.Count-1;
+  FinishIndex := fStates.Count-1;
 end;
 
 procedure TNfa.AddStateByLabelAtStart(AInitStr: string);
@@ -365,8 +366,8 @@ begin
   fStates.Insert(0, newState);
   newState.fSelfIndex := 0;
   newState.fStateList := fStates;
-  newState.AddTransition(AInitStr, fStartIndex);
-  fStartIndex := 0;
+  newState.AddTransition(AInitStr, StartIndex);
+  StartIndex := 0;
 end;
 
 procedure TNfa.Add(other: TNfa);
@@ -381,8 +382,8 @@ begin
     st.fStateList:=fStates;
     FStates.Add(st);
   end;
-  fStates[fFinishIndex].AddTransition('', delta);
-  fFinishIndex := other.fFinishIndex+delta;
+  fStates[FinishIndex].AddTransition('', delta);
+  FinishIndex := other.FinishIndex+delta;
 end;
 
 procedure TNfa.AddParallel(other: TNfa);
@@ -390,32 +391,32 @@ var
   i: integer;
   cloned: TNfa;
 begin
-  if not fStates[fStartIndex].OnlyEpsTransitions then
+  if not fStates[StartIndex].OnlyEpsTransitions then
     AddStateByLabelAtStart('');
-  if not fStates[fFinishIndex].OnlyEpsBackTransitions then
+  if not fStates[FinishIndex].OnlyEpsBackTransitions then
     AddStateByLabel('');
   cloned := other.Clone;
-  cloned.fStates[cloned.fFinishIndex].Unfinish;
+  cloned.fStates[cloned.FinishIndex].Unfinish;
   cloned.DeltaIndices(fStates.Count);
   for i := 0 to cloned.fStates.Count-1 do
   begin
     cloned.fStates[i].fStateList:=fStates;
     fStates.Add(cloned.fStates[i]);
   end;
-  fStates[fStartIndex].AddTransition('', cloned.fStartIndex);
-  fStates[cloned.fFinishIndex].AddTransition('', fFinishIndex);
+  fStates[StartIndex].AddTransition('', cloned.StartIndex);
+  fStates[cloned.FinishIndex].AddTransition('', FinishIndex);
 end;
 
 procedure TNfa.MakePlus;
 begin
-  if not fStates[fFinishIndex].OnlyEpsBackTransitions then
+  if not fStates[FinishIndex].OnlyEpsBackTransitions then
     AddStateByLabel('');
-  fStates[fFinishIndex].AddTransition('',fStartIndex);
+  fStates[FinishIndex].AddTransition('',StartIndex);
 end;
 
 procedure TNfa.MakeQuest;
 begin
-  fStates[fStartIndex].AddTransition('',fFinishIndex);
+  fStates[StartIndex].AddTransition('',FinishIndex);
 end;
 
 procedure TNfa.MakeStar;
@@ -441,6 +442,11 @@ begin
   Result := Result+'}';
 end;
 
+function TNfa.getState(Index: Integer): TNfaState;
+begin
+  Result := fStates[Index];
+end;
+
 procedure TNfa.Check();
 var
   i, j, k: integer;
@@ -464,11 +470,11 @@ begin
     if fStates[i].fFinished then
     begin
       Inc(fc);
-      if fFinishIndex<>i then inc(fcErr);
+      if FinishIndex<>i then inc(fcErr);
     end else
     begin
       if fStates[i].fTrList.Count=0 then inc(emptyErr);
-      if fFinishIndex=i then inc(fcErr);
+      if FinishIndex=i then inc(fcErr);
     end;
     if fStates[i].fSelfIndex<>i then
       Inc(err0);
@@ -481,7 +487,7 @@ begin
   end;
   for i := 0 to High(backCounts) do
   begin
-    if (i<>fStartIndex) and (backCounts[i]=0) then
+    if (i<>StartIndex) and (backCounts[i]=0) then
        inc(emptyBackErr);
   end;
 

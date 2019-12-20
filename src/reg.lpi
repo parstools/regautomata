@@ -27,7 +27,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <Units Count="3">
+    <Units Count="4">
       <Unit0>
         <Filename Value="reg.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -42,6 +42,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Dfa"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="nfaconverter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NfaConverter"/>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
