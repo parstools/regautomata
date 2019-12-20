@@ -29,7 +29,7 @@ procedure TDfa.AddState(AFinished: Boolean);
 var
   newState: TState;
 begin
-  newState := TState.Create(True);
+  newState := TState.Create(AFinished);
   fStates.Add(newState);
   newState.SelfIndex := fStates.Count-1;
   newState.StateList := fStates;

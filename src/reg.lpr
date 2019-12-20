@@ -12,7 +12,7 @@ begin
   aNfa.AddStateByLabel('a');
   aNfa.AddStateByLabel('b');
   aNfa.Check();
-  aNfa.MakeQuest;
+//  aNfa.MakeQuest;
   aNfa.Check();
 
   bNfa:=TNfa.Create;
