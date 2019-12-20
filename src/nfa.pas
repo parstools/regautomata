@@ -320,6 +320,7 @@ var
   t, tback: TTransition;
   destState: TNfaState;
 begin
+  Assert(fStateList<>nil);
   for i := 0 to fTrList.Count-1 do
   begin
     t := fTrList[i];

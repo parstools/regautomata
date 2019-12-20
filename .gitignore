@@ -1,8 +1,8 @@
 backup/
 lib/
+reg
 *.exe
 *.dbg
 *.lps
 out*.dot
 *.png
-
