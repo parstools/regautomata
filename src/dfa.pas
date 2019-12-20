@@ -13,6 +13,7 @@ type
   TDfa = class(TFa)
   public
     function Clone: TDfa;
+    procedure AddState(AFinished: Boolean);
   end;
 
 implementation
@@ -21,6 +22,16 @@ function TDfa.Clone: TDfa;
 begin
   Result := TDfa.Create(false);
   CloneStates(Result);
+end;
+
+procedure TDfa.AddState(AFinished: Boolean);
+var
+  newState: TState;
+begin
+  newState := TState.Create(True);
+  fStates.Add(newState);
+  newState.SelfIndex := fStates.Count-1;
+  newState.StateList := fStates;
 end;
 
 end.

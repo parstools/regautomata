@@ -28,6 +28,7 @@ type
 
   TNfaSet = class
   private
+    FFinished: boolean;
     fNfaList: TNfaList;
     fBits: TBits;
   public
@@ -38,6 +39,7 @@ type
     procedure eClosure(aNfa: TNfa);
     function nonEmpty: boolean;
     procedure TransitTo(aNfa: TNfa; ALabel:TLabel; DestSet:TNfaSet);
+    property Finished: boolean read FFinished;
   end;
 
   { TSetSet }
@@ -127,6 +129,7 @@ procedure TNfaSet.Add(nfaState: TState);
 begin
   fNfaList.Add(nfaState);
   fBits.SetOn(nfaState.SelfIndex);
+  if nfaState.Finished then FFinished:=true;
 end;
 
 procedure TNfaSet.eClosure(aNfa: TNfa);
@@ -177,7 +180,8 @@ end;
 
 procedure TNfaConverter.Convert(aNfa: TNfa; aDfa: TDfa);
 var
-  index: integer;
+  srcIndex: integer;
+  destIndex: integer;
   labelIdx: integer;
   StartSet,SrcSet, DestSet: TNfaSet;
 begin
@@ -186,10 +190,10 @@ begin
   StartSet.Add(aNfa.getState(aNfa.StartIndex));
   StartSet.eClosure(aNfa);
   fSetSet.Add(StartSet);
-  index := 0;
-  while index<fSetSet.Count do
+  srcIndex := 0;
+  while srcIndex<fSetSet.Count do
   begin
-    SrcSet := fSetSet[Index];
+    SrcSet := fSetSet[srcIndex];
     for labelIdx := 0 to fLabelSet.Count-1 do
     begin
       DestSet := TNfaSet.Create;
@@ -197,7 +201,10 @@ begin
       if DestSet.nonEmpty then
       begin
         DestSet.eCLosure(aNfa);
-        fSetSet.Add(DestSet);
+        destIndex := fSetSet.Add(DestSet);
+        if destIndex>=aDfa.Count then
+           aDfa.AddState(DestSet.Finished);
+        aDfa[srcIndex].AddTransition(fLabelSet[labelIdx].InitStr, destIndex);
       end;
     end;
   end;

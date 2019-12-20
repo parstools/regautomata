@@ -17,7 +17,7 @@ begin
   bNfa.AddStateByLabel('c');
   bNfa.AddStateByLabel('d');
 
-  aNfa.AddParallel(bNfa);
+  aNfa.JoinParallel(bNfa);
   aNfa.Check();
 
   c1:=aNfa.Clone;

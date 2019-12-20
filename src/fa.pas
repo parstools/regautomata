@@ -19,6 +19,7 @@ type
     function Equals(Obj: TObject) : boolean; override;
     function Clone: TLabel;
     function getDot: string;
+    property InitStr: string read fInitStr;
   end;
 
   { TTransition }
@@ -65,6 +66,8 @@ type
   { TFa }
 
   TFa = class
+  private
+    function GetItems(i : Longint): TState;
   protected
     fStates: TStateList;
     procedure CloneStates(dest: TFa);
@@ -76,6 +79,8 @@ type
     function getDot: string;
     function getState(Index: integer): TState;
     procedure printDot(AFileName: string);
+    function Count: integer;
+    property Items[i : Longint]: TState read GetItems; Default;
   end;
 
 implementation
@@ -290,6 +295,11 @@ begin
     Result := Result+TrList[i].getDot(SelfIndex)+#10;
 end;
 
+function TFa.GetItems(i : Longint): TState;
+begin
+  Result:=fStates[i];
+end;
+
 procedure TFa.CloneStates(dest: TFa);
 var
   i: integer;
@@ -372,6 +382,11 @@ begin
   Rewrite(f);
   write(f, getDot);
   CloseFile(f);
+end;
+
+function TFa.Count: integer;
+begin
+  Result:=fStates.Count;
 end;
 
 end.

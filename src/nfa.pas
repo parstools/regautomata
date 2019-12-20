@@ -19,8 +19,8 @@ type
     procedure DeltaIndices(Delta: integer);
     procedure AddStateByLabel(AInitStr: string);
     procedure AddStateByLabelAtStart(AInitStr: string);
-    procedure Add(other: TNfa);
-    procedure AddParallel(other: TNfa);
+    procedure Join(other: TNfa);
+    procedure JoinParallel(other: TNfa);
     procedure MakePlus;
     procedure MakeQuest;
     procedure MakeStar;
@@ -83,7 +83,7 @@ begin
   StartIndex := 0;
 end;
 
-procedure TNfa.Add(other: TNfa);
+procedure TNfa.Join(other: TNfa);
 var
   i, delta: integer;
   st: TState;
@@ -99,7 +99,7 @@ begin
   FinishIndex := other.FinishIndex+delta;
 end;
 
-procedure TNfa.AddParallel(other: TNfa);
+procedure TNfa.JoinParallel(other: TNfa);
 var
   i: integer;
   cloned: TNfa;
