@@ -1,6 +1,6 @@
 program reg;
 
-uses Nfa, Dfa, NfaConverter;
+uses Nfa, Dfa, NfaConverter, Fa;
 
 var
   aNfa,bNfa: TNfa;

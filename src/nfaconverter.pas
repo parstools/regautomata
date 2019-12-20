@@ -5,7 +5,7 @@ unit NfaConverter;
 interface
 
 uses
-  Classes, SysUtils, fgl, Nfa, Dfa;
+  Classes, SysUtils, fgl, Fa, Nfa, Dfa;
 
 type
   { TLabelSet }
